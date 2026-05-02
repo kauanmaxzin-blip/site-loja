@@ -1,52 +1,70 @@
-const API = "https://lojas-de-scripts.onrender.com";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { 
+  getAuth, 
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-// carregar produtos
-fetch(API + "/produtos")
-  .then(res => res.json())
-  .then(produtos => {
-    const container = document.getElementById("lista-produtos");
+// 🔥 SUA CONFIG (já coloquei)
+const firebaseConfig = {
+  apiKey: "AIzaSyDDtq4Uk2sFkUQIbwyag3jmQSfaMMg6o9w",
+  authDomain: "loja-scripts.firebaseapp.com",
+  projectId: "loja-scripts",
+  storageBucket: "loja-scripts.firebasestorage.app",
+  messagingSenderId: "709306440079",
+  appId: "1:709306440079:web:cd74b604dd1294dcd413fa",
+  measurementId: "G-N94GR40WXR"
+};
 
-    produtos.forEach(p => {
-      container.innerHTML += `
-        <div class="card">
-          <h3>${p.nome}</h3>
-          <p>R$ ${p.preco}</p>
-          <button onclick="comprar('${p.nome}')">Comprar</button>
-        </div>
-      `;
-    });
-  });
+// iniciar
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-// comprar
-function comprar(produto) {
-  fetch(API + "/comprar", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      usuario: "Kauan",
-      produto: produto
-    })
-  })
-  .then(() => {
-    alert("Compra feita!");
-    carregarHistorico();
-  });
-}
+// 📌 CADASTRO
+window.cadastrar = function () {
+  const email = document.getElementById("email").value;
+  const senha = document.getElementById("senha").value;
 
-// histórico
-function carregarHistorico() {
-  fetch(API + "/historico")
-    .then(res => res.json())
-    .then(dados => {
-      const lista = document.getElementById("lista-historico");
-      lista.innerHTML = "";
+  createUserWithEmailAndPassword(auth, email, senha)
+    .then(() => alert("Conta criada 🔥"))
+    .catch(err => alert(err.message));
+};
 
-      dados.forEach(c => {
-        lista.innerHTML += `<li>${c.produto}</li>`;
-      });
-    });
-}
+// 📌 LOGIN
+window.login = function () {
+  const email = document.getElementById("email").value;
+  const senha = document.getElementById("senha").value;
 
-carregarHistorico();
+  signInWithEmailAndPassword(auth, email, senha)
+    .then(() => alert("Logado com sucesso 🔥"))
+    .catch(err => alert(err.message));
+};
+
+// 📌 GOOGLE LOGIN
+window.loginGoogle = function () {
+  const provider = new GoogleAuthProvider();
+
+  signInWithPopup(auth, provider)
+    .then(() => alert("Login com Google OK 🔥"))
+    .catch(err => alert(err.message));
+};
+
+// 📌 MOSTRAR USUÁRIO LOGADO
+onAuthStateChanged(auth, (user) => {
+  const el = document.getElementById("usuario-logado");
+
+  if (user) {
+    el.innerText = "Logado como: " + user.email;
+  } else {
+    el.innerText = "Não logado";
+  }
+});
+
+// 📌 LOGOUT
+window.logout = function () {
+  signOut(auth);
+};
